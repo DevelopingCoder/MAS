@@ -27,13 +27,63 @@ void topological_sort(int * permutation, int * visited, int * postorder, int * a
 	}
 }
 
-int solver(int * adj_matrix, int * rand_perm, int num_nodes) {
+int solver(int * adj_matrix, int * rand_perm, int start, int end) {
+	int num_nodes = end - start
+	if (num_nodes == 1)
+	{
+		return 0;
+	}
+	int half =  (end - start)/2
+	solver(adj_matrix, rand_perm, start, half)
+	solver(adj_matrix, rand_perm, half, end)
+
+	int setA;
+	int setB;
+	for (int i = start; i < half; ++i)
+	{
+		for (int j = half; j < end; ++j)
+		{
+			if (adj_matrix[i*num_nodes + j])
+			{
+				setA += 1;
+			}
+			else if (adj_matrix[j*num_nodes + i])
+			{
+				setB += 1;
+			}	
+		}
+	}
+
+	int deleted;
+	if (setA >= setB)
+	{
+		for (int i = start; i < half; ++i)
+		{
+			for (int j = half; j < end; ++j)
+			{
+				adj_matrix[j*num_nodes + i] = 0;
+			}
+		}
+		deleted = setB;
+	}
+
+	if (setA < setB)
+	{
+		for (int i = start; i < half; ++i)
+		{
+			for (int j = half; j < end; ++j)
+			{
+				adj_matrix[j*num_nodes + i] = 0;
+			}
+		}
+		deleted = setA;
+	}
 
 	int subset_size = 1; 
 
 	while (subset_size < num_nodes) {
 		
-		for (int s = 0; s < num_nodes; s += subset_size)
+		for (int s = 0; s < num_nodes; s += 2*subset_size)
 		{
 			int setA = 0;
 			int setB = 0;
@@ -87,7 +137,7 @@ int solver(int * adj_matrix, int * rand_perm, int num_nodes) {
 int num_forward_edges(int * order, int * adj_matrix, int num_nodes) {
 	int forward_edges = 0;
 	for (int i = 0; i < num_nodes; i++) {
-		for (int j = i+1; j < num_nodes; j++) {
+		for (int j = 0; j < num_nodes; j++) {
 			if (adj_matrix[i * num_nodes + j] == 1) {
 				forward_edges += 1;
 			}
