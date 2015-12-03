@@ -5,8 +5,6 @@
 #include <unistd.h>
 #include <omp.h>	
 
-int bestSolutionsRank = 0;
-
 // Fisher-Yates shuffle taken from http://www.dispersiondesign.com/articles/algorithms/shuffle_array_order
 void shuffle(int * a, int n)
 {
@@ -221,7 +219,7 @@ void edge(int a, int b, int * adj_matrix, int num_nodes) {
 	adj_matrix[a * num_nodes + b] = 1;
 }
 
-int* findSolution(int* adjMatrix, int num_nodes) {
+int* findSolution(int* adjMatrix, int num_nodes, int* bestSolutionsRank) {
 	/*Overall Strategy: Keep 2 PQs containing 14 permutations with their rank. Pop out 
 	the worst 9 and replace them with variations of the best 5 and add 4 random. 
 	Then we solve the 9 and repush them into PQ, repeating the process of dropping 
@@ -377,15 +375,15 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 
 	//Push the last element of pq2 into pq1. Then, pop off the element from pq1 and free it
 	//The last remaining element is the optimal solution
-	int* otherBestElement = priq_pop(pq2, &bestSolutionsRank);
-	priq_push(pq1, otherBestElement, bestSolutionsRank);
+	int* otherBestElement = priq_pop(pq2, bestSolutionsRank);
+	priq_push(pq1, otherBestElement, *bestSolutionsRank);
 
 	//free worst solution
 	otherBestElement = priq_pop(pq1, NULL);
 	free(otherBestElement);
 	
-	int* best_solution = priq_pop(pq1, &bestSolutionsRank);
-	printf("rank is %d	", bestSolutionsRank);
+	int* best_solution = priq_pop(pq1, bestSolutionsRank);
+	printf("rank is %d	", *bestSolutionsRank);
 	return best_solution;
 }
 
@@ -424,7 +422,7 @@ int main(int argc, const char* argv[])
 			//THe first read should be the number of nodes
 			fgets(line, sizeof(line), testIn);
 			int num_nodes = atoi(line);
-
+			printf("reading thread %d \n", thread_ID);
 			//Malloc space for the matrix
 			int* adjMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
 			//Iterate through the file line by line, loading numbers into the matrix
@@ -439,7 +437,8 @@ int main(int argc, const char* argv[])
 			}
 			fclose(testIn);
 
-			int* optSol = findSolution(adjMatrix, num_nodes);
+			int bestSolutionsRank = 0;
+			int* optSol = findSolution(adjMatrix, num_nodes, &bestSolutionsRank);
 			/* check to see if you did better than the last one */
 			/* check if there exists an out file, if not create the output file*/
 			char outputFileName[15];
