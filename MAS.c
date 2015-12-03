@@ -275,9 +275,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	pri_queue tempPQ2;
 	time_t start = time(NULL);
 	int* badResults;
-	int v = 0;
-	while (v < 500) {
-		v += 1;
+	while ((time(NULL) - start) < 30) {
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 6; ++i)
 		{
