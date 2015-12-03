@@ -280,7 +280,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	time_t start = time(NULL);
 	int* badResults;
 	int v = 0;
-	while (v < 45000) {
+	while (v < 40) {
 		v+=1;
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 9; ++i)
@@ -408,8 +408,12 @@ int main(int argc, const char* argv[])
 		printf("Completed %d iterations\n\n", iterations);
 		iterations += 1;
 		//LOOP through all in files
+		#pragma omp for
 		for (int i = 1; i < 622; ++i)
 		{
+			int thread_ID = omp_get_thread_num();
+            printf(" hello world %d\n", thread_ID);
+            
 			//Read the file
 			char inFile[15];
 			sprintf(inFile, "instances/%d.in", i);
