@@ -8,10 +8,9 @@ void shuffle(int * a, int n)
 {
       int i = n - 1;
       int j, temp;                
-
       while (i > 0)
       {
-            j = rand() % (i + 1);
+            j = ((rand() % (i + 1)) * time(NULL)) % (i + 1);
             temp = a[i];
             a[i] = a[j];
             a[j] = temp;
@@ -266,12 +265,13 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	pri_queue tempPQ;
 	time_t start = time(NULL);
 	int v = 0;
-	while (v < 1) {
+	int* badResults;
+	while (v < 500) {
 		v+=1;
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 6; ++i)
 		{
-			int* badResults = priq_pop(pq, NULL);
+			badResults = priq_pop(pq, NULL);
 			free(badResults);
 		}
 
@@ -313,9 +313,18 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	//Return the best solution as the result
 	for (int i = 0; i < 11; ++i)
 	{
-		free(priq_pop(pq, NULL));
+		badResults = priq_pop(pq, NULL);
+		// for (int i = 0; i < num_nodes; ++i)
+		// 	{
+		// 		printf("%d ", badResults[i]);
+		// 	}
+		// 	printf("\n\n");
+		free(badResults);
 	}
-	int* best_solution = priq_pop(pq, NULL);
+
+	int ranking;
+	int* best_solution = priq_pop(pq, &ranking);
+	printf("%d\n", ranking);
 	return best_solution;
 }
 
@@ -327,11 +336,11 @@ int main(int argc, const char* argv[])
 
 	//LOOP through all in files
 	// #pragma omp for
-	for (int i = 1; i < 2; ++i)
+	for (int i = 1; i < 5; ++i)
 	{
 		//Read the file
 		char inFile[15];
-		sprintf(inFile, "test%d.in", i);
+		sprintf(inFile, "aMASing%d.in", i);
 		FILE* testIn = fopen(inFile, "r");
 		char line[500];
 
