@@ -408,6 +408,8 @@ int main(int argc, const char* argv[])
 		#pragma omp for
 		for (int i = 1; i < 622; ++i)
 		{
+			int thread_ID = omp_get_thread_num();
+			printf("thread is %d\n", thread_ID);
 			//Read the file
 			char inFile[15];
 			sprintf(inFile, "instances/%d.in", i);
