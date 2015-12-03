@@ -222,13 +222,14 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	/*Overall Strategy: Keep a PQ containing 12 permutations with their rank. Pop out 
 	the worst 6 and replace them with variations of the best 6. Then we solve the 6 and
 	repush them into PQ, repeating the process of dropping the worst ones.*/
-	pri_queue pq = priq_new(12);
+	pri_queue pq1 = priq_new(12);
+	pri_queue pq2 = priq_new(12);
 	//Shuffle the nodes and pass them into the solver 12 times. Insert result into PQ
 
 	int rank;
 	int* nodes;
 	int* copyMatrix;
-	for (int twelve = 0; twelve < 12; ++twelve)
+	for (int twentyFour = 0; twentyFour < 24; ++twentyFour)
 	{
 		//Set up initial array of nodes
 		nodes = malloc(sizeof(int) * num_nodes);
@@ -252,7 +253,15 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 
 		//Solver will modify 'nodes' and return the number of forward edges
 		rank = solver(copyMatrix, nodes, num_nodes);
-		priq_push(pq, nodes, rank);
+
+		//Split pushing into 2 groups
+		if (twentyFour < 12)
+		{
+			priq_push(pq1, nodes, rank);
+		} else {
+			priq_push(pq2, nodes, rank);
+		}
+		
 
 		//Free the matrix
 		free(copyMatrix);
@@ -262,23 +271,39 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	and for each good permutation, push it into the new PQ, solve its variation, and then 
 	push that variation into the PQ. */
 
-	pri_queue tempPQ;
+	pri_queue tempPQ1;
+	pri_queue tempPQ2;
 	time_t start = time(NULL);
-	int v = 0;
 	int* badResults;
+	int v = 0;
 	while (v < 500) {
-		v+=1;
+		v += 1;
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 6; ++i)
 		{
-			badResults = priq_pop(pq, NULL);
+			//Free PQ1
+			badResults = priq_pop(pq1, NULL);
+			free(badResults);
+
+			//Free PQ2
+			badResults = priq_pop(pq2, NULL);
 			free(badResults);
 		}
 
-		tempPQ = priq_new(12);
+		tempPQ1 = priq_new(12);
+		tempPQ2 = priq_new(12);
 		int* goodResult;
-		while (goodResult = priq_pop(pq, &rank)){
-			priq_push(tempPQ, goodResult, rank);
+		//Create the 6 variations of the good ones, then solve them and push into pq
+		for (int twelve = 0; twelve < 12; ++twelve)
+		{
+			if (twelve < 6)
+			{
+				goodResult = priq_pop(pq1, &rank);
+				priq_push(tempPQ1, goodResult, rank);
+			} else {
+				goodResult = priq_pop(pq2, &rank);
+				priq_push(tempPQ2, goodResult, rank);
+			}					
 
 			//Create a variation of the goodResult
 			nodes = malloc(sizeof(int) * num_nodes);
@@ -303,27 +328,41 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 			}
 			
 			rank = solver(copyMatrix, nodes, num_nodes);
-			priq_push(tempPQ, nodes, rank);
+			if (twelve < 6)
+			{
+				priq_push(tempPQ1, nodes, rank);
+			} else {
+				priq_push(tempPQ2, nodes, rank);
+			}	
+			
 			free(copyMatrix);
    		}
 
-   		pq = tempPQ;
+   		pq1 = tempPQ1;
+   		pq2 = tempPQ2;
 	}
 
 	//Return the best solution as the result
 	for (int i = 0; i < 11; ++i)
 	{
-		badResults = priq_pop(pq, NULL);
-		// for (int i = 0; i < num_nodes; ++i)
-		// 	{
-		// 		printf("%d ", badResults[i]);
-		// 	}
-		// 	printf("\n\n");
+		badResults = priq_pop(pq1, NULL);
+		free(badResults);
+
+		badResults = priq_pop(pq2, NULL);
 		free(badResults);
 	}
 
+	//Push the last element of pq2 into pq1. Then, pop off the element from pq1 and free it
+	//The last remaining element is the optimal solution
 	int ranking;
-	int* best_solution = priq_pop(pq, &ranking);
+	int* otherBestElement = priq_pop(pq2, &ranking);
+	priq_push(pq1, otherBestElement, ranking);
+
+	//free worst solution
+	otherBestElement = priq_pop(pq1, NULL);
+	free(otherBestElement);
+
+	int* best_solution = priq_pop(pq1, &ranking);
 	printf("%d\n", ranking);
 	return best_solution;
 }
@@ -336,7 +375,7 @@ int main(int argc, const char* argv[])
 
 	//LOOP through all in files
 	// #pragma omp for
-	for (int i = 1; i < 5; ++i)
+	for (int i = 1; i < 2; ++i)
 	{
 		//Read the file
 		char inFile[15];
