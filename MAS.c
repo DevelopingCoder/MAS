@@ -152,70 +152,38 @@ void delete_edges(int * adj_matrix, int * nodes, int start, int end, int num_nod
 		//printf("back to %d\n", );
 		int setA = 0;
 		int setB = 0;
-		/* check which direction edges to delete */
-		for (int i = 0; i < num_nodes; i++) {
-			printf("%d, ", nodes[i]);
-		}
-		printf("\n");
 		for (int i = start; i <= middle; i++) {
 			for (int j = middle + 1; j <= end; j++) {
 				int indexA = nodes[i];
 				int indexB = nodes[j];
 				if (adj_matrix[indexA * num_nodes + indexB] == 1) {
-					printf("i: %d, j: %d\n", i, j);
-					printf("edge from %d to %d\n", indexA, indexB);
 					/* there is an edge going from set A to set B */
 					setA += 1;
 				}
 				if (adj_matrix[indexB * num_nodes + indexA] == 1) {
-					printf("i: %d, j: %d\n", i, j);
-					printf("edge from %d to %d\n", indexB, indexA);
 					/* there is an edge going from set B to set A */
 					setB += 1;
 				}
 			}
 		}
 		/* delete the edges */
-		printf("first half from %d to %d\n", start, middle);
-		printf("second half from %d to %d\n", middle+1, end);
-		printf("Set B is size %d\n", setB);
-		printf("Set A is size %d\n", setA);
 		for (int i = start; i <= middle; i++) {
 			for (int j = middle + 1; j <= end; j++) {
 				int indexA = nodes[i];
 				int indexB = nodes[j];
 				if (setB >= setA && setB != 0 && adj_matrix[indexA * num_nodes + indexB] == 1) {
 					adj_matrix[indexA * num_nodes + indexB] = 0;
-					printf("deleting edges from A: %d to %d\n", indexA, indexB);
 				} else if (setA > setB && adj_matrix[indexB * num_nodes + indexA] == 1) {
 					adj_matrix[indexB * num_nodes + indexA] = 0;
-					printf("deleting edges from B: %d to %d\n", indexB, indexA);
 				}
 			}
 		}
-		
-		printf("\n");
-
 	}
 }
 
 int solver(int * adj_matrix, int * rand_perm, int num_nodes) {
-	printf("NOW IN SOLVER\n");
-	printf("before delete edges: \n");
-	for (int i = 0; i < num_nodes; ++i)
-	{
-		printf("%d ", rand_perm[i]);
-	}
-	printf("\n");
 	delete_edges(adj_matrix, rand_perm, 0, num_nodes - 1, num_nodes);
-	for (int i = 0; i < num_nodes; ++i)
-	{
-		for (int j = 0; j < num_nodes; j++)
-		{
-			printf("%d ", adj_matrix[i*num_nodes + j]); 
-		}
-		printf("\n");
-	}
+
 	/* now the adjacency matrix has been modified with the deleted edges 
 	   linearize the dag! */
 	int * visited = malloc(sizeof(int) * num_nodes); 
@@ -227,12 +195,6 @@ int solver(int * adj_matrix, int * rand_perm, int num_nodes) {
 	free(visited);
 	free(postorder);
 	ticks = 0;
-	printf("\n");
-	for (int i = 0; i < num_nodes; ++i)
-	{
-		printf("%d ", rand_perm[i]);
-	}
-	printf("\n");
 	/* now rand_perm is in topological order */
 	return num_forward_edges(rand_perm, adj_matrix, num_nodes);
 
@@ -249,7 +211,6 @@ int num_forward_edges(int * order, int * adj_matrix, int num_nodes) {
 			}
 		}
 	}
-	printf("Forward edges are %d\n", forward_edges);
 	return forward_edges;
 }
 
