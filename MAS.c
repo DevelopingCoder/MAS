@@ -223,8 +223,8 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	the worst 9 and replace them with variations of the best 5 and add 4 random. 
 	Then we solve the 9 and repush them into PQ, repeating the process of dropping 
 	the worst ones.*/
-	pri_queue pq1 = priq_new(12);
-	pri_queue pq2 = priq_new(12);
+	pri_queue pq1 = priq_new(14);
+	pri_queue pq2 = priq_new(14);
 	//Shuffle the nodes and pass them into the solver 12 times. Insert result into PQ
 
 	int rank;
