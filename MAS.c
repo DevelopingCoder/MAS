@@ -268,7 +268,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	time_t start = time(NULL);
 	int v = 0;
 	int* badResults;
-	while (v < 45000) {
+	while (v < 1000) {
 		v+=1;
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 6; ++i)
@@ -324,9 +324,9 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 		free(badResults);
 	}
 
-	int ranking;
-	int* best_solution = priq_pop(pq, &ranking);
-	printf("%d\n", ranking);
+	int* best_solution = priq_pop(pq, &bestSolutionsRank);
+	printf("rank is: %d\n", bestSolutionsRank);
+
 	return best_solution;
 }
 
@@ -422,6 +422,7 @@ int main(int argc, const char* argv[])
 
 			//Free the Matrix and the optimal solution
 			free(adjMatrix);
+			printf("%d.in\n", i);
 		}
 	}
 
