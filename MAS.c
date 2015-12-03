@@ -382,8 +382,9 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	//free worst solution
 	otherBestElement = priq_pop(pq1, NULL);
 	free(otherBestElement);
-
+	
 	int* best_solution = priq_pop(pq1, &bestSolutionsRank);
+	printf("rank is %d\n", bestSolutionsRank);
 	return best_solution;
 }
 
