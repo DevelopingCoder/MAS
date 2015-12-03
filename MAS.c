@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <omp.h>
 
 int bestSolutionsRank = 0;
 
@@ -413,7 +414,7 @@ int main(int argc, const char* argv[])
 		{
 			int thread_ID = omp_get_thread_num();
             printf(" hello world %d\n", thread_ID);
-            
+
 			//Read the file
 			char inFile[15];
 			sprintf(inFile, "instances/%d.in", i);
