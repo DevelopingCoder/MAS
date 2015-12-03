@@ -279,7 +279,9 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	pri_queue tempPQ2;
 	time_t start = time(NULL);
 	int* badResults;
-	while ((time(NULL) - start) < 1) {
+	int v = 0;
+	while (v < 45000) {
+		v+=1;
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 7; ++i)
 		{
@@ -382,7 +384,6 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	free(otherBestElement);
 
 	int* best_solution = priq_pop(pq1, &bestSolutionsRank);
-	printf("rank is %d\n", bestSolutionsRank);
 	return best_solution;
 }
 
@@ -402,83 +403,84 @@ int fileExists(const char* file) {
 int main(int argc, const char* argv[])
 {
 	//Formats the code to read the input, solve, then output
-
-	//LOOP through all in files
-	// #pragma omp for
-	for (int i = 2; i < 3; ++i)
-	{
-	
-		//Read the file
-		char inFile[15];
-		sprintf(inFile, "aMASing%d.in", i);
-		FILE* testIn = fopen(inFile, "r");
-		char line[500];
-
-		//THe first read should be the number of nodes
-		fgets(line, sizeof(line), testIn);
-		int num_nodes = atoi(line);
-
-		//Malloc space for the matrix
-		int* adjMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
-		//Iterate through the file line by line, loading numbers into the matrix
-		for (int i = 0; i < num_nodes; ++i)
+	while (1) {
+		//LOOP through all in files
+		// #pragma omp for
+		for (int i = 1; i < 622; ++i)
 		{
-			fgets(line, sizeof(line), testIn);
-			for (int j = 0; j < 2*num_nodes; j+=2) //+= 2 because we skip spaces
-			{
-				int edge = line[j] - '0';
-				adjMatrix[i*num_nodes + j/2] = edge; //j/2 to account for the skipping
-			}
-		}
-		fclose(testIn);
+			//Read the file
+			char inFile[15];
+			sprintf(inFile, "instances/%d.in", i);
+			FILE* testIn = fopen(inFile, "r");
+			char line[500];
 
-		int* optSol = findSolution(adjMatrix, num_nodes);
-		/* check to see if you did better than the last one */
-		/* check if there exists an out file, if not create the output file*/
-		char outputFileName[15];
-		sprintf(outputFileName, "outputs/%d.out", i);
-		// FILE* oldOutFile = fopen(outputFileName, "r");
-		//Create the output file
-		if (access(outputFileName, F_OK ) == -1) {
-			/*  there was no existing out file for this instance 
-				so we close the file we tried opening, open a new 
-				file and write the rank and node ordering to that */
-			// fclose(oldOutFile);
-			FILE* testOut = fopen(outputFileName, "w");
-			fprintf(testOut, "%d\n", bestSolutionsRank);
+			//THe first read should be the number of nodes
+			fgets(line, sizeof(line), testIn);
+			int num_nodes = atoi(line);
+
+			//Malloc space for the matrix
+			int* adjMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
+			//Iterate through the file line by line, loading numbers into the matrix
 			for (int i = 0; i < num_nodes; ++i)
 			{
-				fprintf(testOut, "%d ", optSol[i] + 1);
+				fgets(line, sizeof(line), testIn);
+				for (int j = 0; j < 2*num_nodes; j+=2) //+= 2 because we skip spaces
+				{
+					int edge = line[j] - '0';
+					adjMatrix[i*num_nodes + j/2] = edge; //j/2 to account for the skipping
+				}
 			}
-			//close the output file
-			fclose(testOut);
-			
-		} else {
-			/* old out file exists, get the rank of the old file */
-			FILE* oldOutFile = fopen(outputFileName, "r");
-			char line2[500];
-			fgets(line2, sizeof(line2), oldOutFile);
-			int oldBestRank = atoi(line2);
-			fclose(oldOutFile);
-			if (oldBestRank < bestSolutionsRank) {
-				/* replace with new best solution */
-				FILE * newOut = fopen(outputFileName, "w");
-				fprintf(newOut, "%d\n", bestSolutionsRank);
+			fclose(testIn);
+
+			int* optSol = findSolution(adjMatrix, num_nodes);
+			/* check to see if you did better than the last one */
+			/* check if there exists an out file, if not create the output file*/
+			char outputFileName[15];
+			sprintf(outputFileName, "outputs/%d.out", i);
+			// FILE* oldOutFile = fopen(outputFileName, "r");
+			//Create the output file
+			if (access(outputFileName, F_OK ) == -1) {
+				/*  there was no existing out file for this instance 
+					so we close the file we tried opening, open a new 
+					file and write the rank and node ordering to that */
+				// fclose(oldOutFile);
+				FILE* testOut = fopen(outputFileName, "w");
+				fprintf(testOut, "%d\n", bestSolutionsRank);
 				for (int i = 0; i < num_nodes; ++i)
 				{
-					fprintf(newOut, "%d ", optSol[i] + 1);
+					fprintf(testOut, "%d ", optSol[i] + 1);
 				}
 				//close the output file
-				fclose(newOut);
+				fclose(testOut);
+				
+			} else {
+				/* old out file exists, get the rank of the old file */
+				FILE* oldOutFile = fopen(outputFileName, "r");
+				char line2[500];
+				fgets(line2, sizeof(line2), oldOutFile);
+				int oldBestRank = atoi(line2);
+				fclose(oldOutFile);
+				if (oldBestRank < bestSolutionsRank) {
+					/* replace with new best solution */
+					FILE * newOut = fopen(outputFileName, "w");
+					fprintf(newOut, "%d\n", bestSolutionsRank);
+					for (int i = 0; i < num_nodes; ++i)
+					{
+						fprintf(newOut, "%d ", optSol[i] + 1);
+					}
+					//close the output file
+					fclose(newOut);
+				}
+				/* else do nothing because old solution out file is better */
 			}
-			/* else do nothing because old solution out file is better */
+
+			//Compute the number of forward edges from this result and then
+			//write out that result followed by the node ordering
+
+
+			//Free the Matrix and the optimal solution
+			free(adjMatrix);
 		}
-
-		//Compute the number of forward edges from this result and then
-		//write out that result followed by the node ordering
-
-
-		//Free the Matrix and the optimal solution
-		free(adjMatrix);
 	}
+
 }
