@@ -384,7 +384,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	free(otherBestElement);
 	
 	int* best_solution = priq_pop(pq1, &bestSolutionsRank);
-	printf("rank is %d\n", bestSolutionsRank);
+	printf("rank is %d	", bestSolutionsRank);
 	return best_solution;
 }
 
@@ -400,11 +400,13 @@ int fileExists(const char* file) {
     	return 0;
     }
 }
-
+int iterations = 0;
 int main(int argc, const char* argv[])
 {
 	//Formats the code to read the input, solve, then output
 	while (1) {
+		printf("Completed %d iterations\n\n", iterations);
+		iterations += 1;
 		//LOOP through all in files
 		for (int i = 1; i < 622; ++i)
 		{
