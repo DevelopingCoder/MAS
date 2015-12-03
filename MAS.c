@@ -2,6 +2,7 @@
 #include <time.h>
 #include <stdlib.h>
 
+int bestSolutionsRank = 0;
 
 // Fisher-Yates shuffle taken from http://www.dispersiondesign.com/articles/algorithms/shuffle_array_order
 void shuffle(int * a, int n)
@@ -217,7 +218,6 @@ void edge(int a, int b, int * adj_matrix, int num_nodes) {
 	adj_matrix[a * num_nodes + b] = 1;
 }
 
-
 int* findSolution(int* adjMatrix, int num_nodes) {
 	/*Overall Strategy: Keep 2 PQs containing 12 permutations with their rank. Pop out 
 	the worst 7 and replace them with variations of the best 5 and add 2 random. 
@@ -277,7 +277,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	pri_queue tempPQ2;
 	time_t start = time(NULL);
 	int* badResults;
-	while ((time(NULL) - start) < 30) {
+	while ((time(NULL) - start) < 1) {
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 7; ++i)
 		{
@@ -372,29 +372,31 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 
 	//Push the last element of pq2 into pq1. Then, pop off the element from pq1 and free it
 	//The last remaining element is the optimal solution
-	int ranking;
-	int* otherBestElement = priq_pop(pq2, &ranking);
-	priq_push(pq1, otherBestElement, ranking);
+	int* otherBestElement = priq_pop(pq2, &bestSolutionsRank);
+	priq_push(pq1, otherBestElement, bestSolutionsRank);
 
 	//free worst solution
 	otherBestElement = priq_pop(pq1, NULL);
 	free(otherBestElement);
 
-	int* best_solution = priq_pop(pq1, &ranking);
-	printf("%d\n", ranking);
+	int* best_solution = priq_pop(pq1, &bestSolutionsRank);
+	printf("rank is %d\n", bestSolutionsRank);
 	return best_solution;
 }
 
 int main(int argc, const char* argv[])
 {
 	//Formats the code to read the input, solve, then output
-	//Create the output file
-	FILE* testOut = fopen("test.out", "w");
 
 	//LOOP through all in files
 	// #pragma omp for
-	for (int i = 1; i < 2; ++i)
+	for (int i = 2; i < 3; ++i)
 	{
+		//Create the output file
+		char outFile[15];
+		sprintf(outFile, "outputs/%d.out", i);
+		FILE* testOut = fopen(outFile, "w");
+
 		//Read the file
 		char inFile[15];
 		sprintf(inFile, "aMASing%d.in", i);
@@ -422,17 +424,17 @@ int main(int argc, const char* argv[])
 
 		int* optSol = findSolution(adjMatrix, num_nodes);
 
-		//Write the node ordering returned from the solution
+		//Compute the number of forward edges from this result and then
+		//write out that result followed by the node ordering
+		fprintf(testOut, "%d\n", bestSolutionsRank);
 		for (int i = 0; i < num_nodes; ++i)
 		{
 			fprintf(testOut, "%d ", optSol[i] + 1);
 		}
-		//Place a newlinew
-		fprintf(testOut,"\n");
+		//close the output file
+		fclose(testOut);
 
 		//Free the Matrix and the optimal solution
 		free(adjMatrix);
 	}
-
-	fclose(testOut);
 }
