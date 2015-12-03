@@ -219,9 +219,10 @@ void edge(int a, int b, int * adj_matrix, int num_nodes) {
 
 
 int* findSolution(int* adjMatrix, int num_nodes) {
-	/*Overall Strategy: Keep a PQ containing 12 permutations with their rank. Pop out 
-	the worst 6 and replace them with variations of the best 6. Then we solve the 6 and
-	repush them into PQ, repeating the process of dropping the worst ones.*/
+	/*Overall Strategy: Keep 2 PQs containing 12 permutations with their rank. Pop out 
+	the worst 7 and replace them with variations of the best 5 and add 2 random. 
+	Then we solve the 6 and repush them into PQ, repeating the process of dropping 
+	the worst ones.*/
 	pri_queue pq1 = priq_new(12);
 	pri_queue pq2 = priq_new(12);
 	//Shuffle the nodes and pass them into the solver 12 times. Insert result into PQ
@@ -267,9 +268,10 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 		free(copyMatrix);
 	}
 	
-	/*For 5 minutes, pop off 6 worst and free them. Then pop off the 6 best. Create a new PQ,
+	/*For 5 minutes, pop off 7 worst and free them. Then pop off the 5 best. Create a new PQ,
 	and for each good permutation, push it into the new PQ, solve its variation, and then 
-	push that variation into the PQ. */
+	push that variation into the PQ. After, create 2 new random permutations, solve them
+	and add them into pq.*/
 
 	pri_queue tempPQ1;
 	pri_queue tempPQ2;
@@ -277,7 +279,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	int* badResults;
 	while ((time(NULL) - start) < 30) {
 		//Pop off the bad arrays and free them
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; i < 7; ++i)
 		{
 			//Free PQ1
 			badResults = priq_pop(pq1, NULL);
@@ -292,23 +294,36 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 		tempPQ2 = priq_new(12);
 		int* goodResult;
 		//Create the 6 variations of the good ones, then solve them and push into pq
-		for (int twelve = 0; twelve < 12; ++twelve)
+		for (int newInserts = 0; newInserts < 14; ++newInserts)
 		{
-			if (twelve < 6)
+			if (newInserts < 5)
 			{
 				goodResult = priq_pop(pq1, &rank);
 				priq_push(tempPQ1, goodResult, rank);
-			} else {
+			} else if (newInserts < 10)
+			{
 				goodResult = priq_pop(pq2, &rank);
 				priq_push(tempPQ2, goodResult, rank);
-			}					
+			}				
 
-			//Create a variation of the goodResult
+			//Create a variation of the goodResult or create a permutation if twelve > 10
 			nodes = malloc(sizeof(int) * num_nodes);
 			for (int i = 0; i < num_nodes; ++i)
 			{
-				nodes[i] = goodResult[i];
+				if (newInserts < 10)
+				{
+					nodes[i] = goodResult[i];
+				} else {
+					nodes[i] = i;
+				}
 			}
+
+			//if generating random permutations, shuffle the nodes
+			if (newInserts >= 10)
+			{
+				shuffle(nodes, num_nodes);
+			}
+
 			int randomIndex = rand() % num_nodes;
 			int randomIndex2 = rand() % num_nodes;
 			int temp = nodes[randomIndex];
@@ -326,12 +341,17 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 			}
 			
 			rank = solver(copyMatrix, nodes, num_nodes);
-			if (twelve < 6)
+			if (newInserts < 5)
 			{
 				priq_push(tempPQ1, nodes, rank);
+			} else if (newInserts < 10)
+			{
+				priq_push(tempPQ2, nodes, rank);
+			} else if (newInserts < 12){
+				priq_push(tempPQ1 ,nodes, rank);
 			} else {
 				priq_push(tempPQ2, nodes, rank);
-			}	
+			}
 			
 			free(copyMatrix);
    		}
