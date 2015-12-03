@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <omp.h>
+#include <omp.h>	
 
 int bestSolutionsRank = 0;
 
@@ -409,7 +409,7 @@ int main(int argc, const char* argv[])
 		printf("Completed %d iterations\n\n", iterations);
 		iterations += 1;
 		//LOOP through all in files
-		#pragma omp for
+		#pragma omp parallel for
 		for (int i = 1; i < 622; ++i)
 		{
 			int thread_ID = omp_get_thread_num();
