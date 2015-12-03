@@ -398,7 +398,7 @@ int main(int argc, const char* argv[])
 		//Write the node ordering returned from the solution
 		for (int i = 0; i < num_nodes; ++i)
 		{
-			fprintf(testOut, "%d ", optSol[i] + 1);
+			fprintf(testOut, "%d ", optSol[i]);
 		}
 		//Place a newlinew
 		fprintf(testOut,"\n");

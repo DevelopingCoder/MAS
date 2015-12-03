@@ -1,6 +1,6 @@
 import sys
 
-instanceSizes = [6]
+instanceSizes = [7]
 
 def main(argv):
 	if len(argv) != 1:
