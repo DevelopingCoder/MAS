@@ -9,8 +9,6 @@ void shuffle(int * a, int n)
       int i = n - 1;
       int j, temp;                
 
-      srand(time(NULL));
-
       while (i > 0)
       {
             j = rand() % (i + 1);
@@ -113,187 +111,6 @@ void priq_combine(pri_queue q, pri_queue q2)
 
 
 
-int main(int argc, const char* argv[])
-{
-	//Formats the code to read the input, solve, then output
-	//Create the output file
-	FILE* testOut = fopen("test.out", "w");
-
-	//LOOP through all in files
-	// #pragma omp for
-	for (int i = 1; i < 2; ++i)
-	{
-		//Read the file
-		char inFile[15];
-		sprintf(inFile, "test%d.in", i);
-		FILE* testIn = fopen(inFile, "r");
-		char line[500];
-
-		//THe first read should be the number of nodes
-		fgets(line, sizeof(line), testIn);
-		int num_nodes = atoi(line);
-
-		//Malloc space for the matrix
-		int* adjMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
-
-		//Iterate through the file line by line, loading numbers into the matrix
-		for (int i = 0; i < num_nodes; ++i)
-		{
-			fgets(line, sizeof(line), testIn);
-			for (int j = 0; j < 2*num_nodes; j+=2) //+= 2 because we skip spaces
-			{
-				int edge = line[j] - '0';
-				adjMatrix[i*num_nodes + j/2] = edge; //j/2 to account for the skipping
-			}
-		}
-		fclose(testIn);
-
-		// int* optSol = findSolution(adjMatrix, num_nodes);
-		int optSol[4] = {1,2,3,4};
-
-		//Write the node ordering returned from the solution
-		for (int i = 0; i < num_nodes; ++i)
-		{
-			fprintf(testOut, "%d ", optSol[i]);
-		}
-		//Place a newline
-		fprintf(testOut,"\n");
-
-		//Free the Matrix and the optimal solution
-		free(adjMatrix);
-	}
-
-	fclose(testOut);
-
-	// //See if PQ works properly on arrays
-	// printf("starting test\n");
-	// pri_queue pq = priq_new(12);
-
-	// int* nodes = malloc(sizeof(int) * 5);
-	// for (int i = 0; i < 5; ++i)
-	// {
-	// 	nodes[i] = 2*i;
-	// }
-	// int* nodes2 = malloc(sizeof(int) * 5);
-	// for (int i = 0; i < 5; ++i)
-	// {
-	// 	nodes2[i] = i;
-	// }
-
-	// priq_push(pq, nodes, 100);
-	// priq_push(pq, nodes2, 20);
-
-	// int* c;
-	// int p;
-	// while (c = priq_pop(pq, &p)){
- //    	printf("%d is the priority Value\n", p, c);
- //    	for (int i = 0; i < 5; ++i)
- //    	{
- //    		printf("%d", c[i]);
- //    	}
- //    	printf("\n\n");
- //    }
- //    free(nodes);
- //    free(nodes2);
-}
-
-int findSolution(int* adjMatrix, int num_nodes) {
-	/*Overall Strategy: Keep a PQ containing 12 permutations with their rank. Pop out 
-	the worst 6 and replace them with variations of the best 6. Then we solve the 6 and
-	repush them into PQ, repeating the process of dropping the worst ones.*/
-	pri_queue pq = priq_new(12);
-	//Shuffle the nodes and pass them into the solver 12 times. Insert result into PQ
-
-	int rank;
-	int* nodes;
-	int* copyMatrix;
-	for (int twelve = 0; twelve < 12; ++twelve)
-	{
-		//Set up initial array of nodes
-		nodes = malloc(sizeof(int) * num_nodes);
-		for (int i = 0; i < num_nodes; ++i)
-		{
-			nodes[i] = i;
-		}
-
-		//Set up a copy of the adjacency matrix
-		copyMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
-		for (int i = 0; i < num_nodes; ++i)
-		{
-			for (int j = 0; j < num_nodes; j++)
-			{
-				copyMatrix[i*num_nodes + j] = adjMatrix[i*num_nodes + j]; 
-			}
-		}
-
-		shuffle(nodes, num_nodes);
-
-		//Solver will modify 'nodes' and return the number of forward edges
-		rank = solver(copyMatrix, nodes, num_nodes);
-		priq_push(pq, nodes, rank);
-
-		//Free the matrix
-		free(copyMatrix);
-	}
-	
-	/*For 5 minutes, pop off 6 worst and free them. Then pop off the 6 best. Create a new PQ,
-	and for each good permutation, push it into the new PQ, solve its variation, and then 
-	push that variation into the PQ. */
-
-	pri_queue tempPQ;
-	time_t start = time(NULL);
-	while ((time(NULL) - start)/60 < 5) {
-
-		//Pop off the bad arrays and free them
-		for (int i = 0; i < 6; ++i)
-		{
-			int* badResults = priq_pop(pq, NULL);
-			free(badResults);
-		}
-
-		tempPQ = priq_new(12);
-		int* goodResult;
-		while (goodResult = priq_pop(pq, &rank)){
-			priq_push(tempPQ, goodResult, rank);
-
-			//Create a variation of the goodResult
-			nodes = malloc(sizeof(int) * num_nodes);
-			for (int i = 0; i < num_nodes; ++i)
-			{
-				nodes[i] = goodResult[i];
-			}
-			int randomIndex = rand() % num_nodes;
-			int randomIndex2 = rand() % num_nodes;
-			nodes[randomIndex] = nodes[randomIndex2];
-			nodes[randomIndex2] = nodes[randomIndex];
-
-			//Set up a copy of the adjacency matrix
-			copyMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
-			for (int i = 0; i < num_nodes; ++i)
-			{
-				for (int j = 0; j < num_nodes; j++)
-				{
-					copyMatrix[i*num_nodes + j] = adjMatrix[i*num_nodes + j]; 
-				}
-			}
-
-			rank = solver(copyMatrix, nodes, num_nodes);
-			priq_push(tempPQ, nodes, rank);
-			free(copyMatrix);
-   		}
-
-   		pq = tempPQ;
-	}
-
-	//Return the best solution as the result
-	for (int i = 0; i < 11; ++i)
-	{
-		free(priq_pop(pq, NULL));
-	}
-	int* best_solution = priq_pop(pq, NULL);
-	return best_solution;
-}
-
 int ticks = 0;
 
 /* dfs method fills out the information in visited[][] and postorder[][] */
@@ -361,43 +178,8 @@ void delete_edges(int * adj_matrix, int * nodes, int start, int end, int num_nod
 				int indexA = nodes[i];
 				int indexB = nodes[j];
 				if (setB >= setA) {
-					/* debugging statements 
-					if (adj_matrix[indexA * num_nodes + indexB] == 1) {
-						printf("deleted back edge from %d to %d\n", i, j);
-						printf("edges from setA to setB: %d\n", setA);
-						printf("edges from setB to setA: %d\n", setB);
-						printf("setA: ");
-						for (int k = start; k <= middle; k++) {
-							printf("%d, ", nodes[k]);
-						}
-						printf("\n");
-						printf("setB: ");
-						for (int k = middle + 1; k <= end; k++) {
-							printf("%d, ", nodes[k]);
-						}
-						printf("\n");
-						
-					}
-					*/
 					adj_matrix[indexA * num_nodes + indexB] = 0;
 				} else if (setA > setB) {
-					/* debugging statements
-					if (adj_matrix[indexB * num_nodes + indexA] == 1) {
-						printf("deleted back edge from %d to %d\n", j, i);
-						printf("edges from setA to setB: %d\n", setA);
-						printf("edges from setB to setA: %d\n", setB);
-						printf("setA: ");
-						for (int k = start; k <= middle; k++) {
-							printf("%d, ", nodes[k]);
-						}
-						printf("\n");
-						printf("setB: ");
-						for (int k = middle + 1; k <= end; k++) {
-							printf("%d, ", nodes[k]);
-						}
-						printf("\n");
-					}
-					*/
 					adj_matrix[indexB * num_nodes + indexA] = 0;
 				}
 			}
@@ -441,4 +223,158 @@ int num_forward_edges(int * order, int * adj_matrix, int num_nodes) {
 
 void edge(int a, int b, int * adj_matrix, int num_nodes) {
 	adj_matrix[a * num_nodes + b] = 1;
+}
+
+
+int* findSolution(int* adjMatrix, int num_nodes) {
+	/*Overall Strategy: Keep a PQ containing 12 permutations with their rank. Pop out 
+	the worst 6 and replace them with variations of the best 6. Then we solve the 6 and
+	repush them into PQ, repeating the process of dropping the worst ones.*/
+	pri_queue pq = priq_new(12);
+	//Shuffle the nodes and pass them into the solver 12 times. Insert result into PQ
+
+	int rank;
+	int* nodes;
+	int* copyMatrix;
+	for (int twelve = 0; twelve < 12; ++twelve)
+	{
+		//Set up initial array of nodes
+		nodes = malloc(sizeof(int) * num_nodes);
+		for (int i = 0; i < num_nodes; ++i)
+		{
+			nodes[i] = i;
+		}
+
+		//Set up a copy of the adjacency matrix
+		copyMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
+		for (int i = 0; i < num_nodes; ++i)
+		{
+			for (int j = 0; j < num_nodes; j++)
+			{
+				copyMatrix[i*num_nodes + j] = adjMatrix[i*num_nodes + j]; 
+			}
+		}
+
+
+		shuffle(nodes, num_nodes);
+
+		//Solver will modify 'nodes' and return the number of forward edges
+		rank = solver(copyMatrix, nodes, num_nodes);
+		printf("%d\n", rank);
+		priq_push(pq, nodes, rank);
+
+		//Free the matrix
+		free(copyMatrix);
+	}
+	
+	/*For 5 minutes, pop off 6 worst and free them. Then pop off the 6 best. Create a new PQ,
+	and for each good permutation, push it into the new PQ, solve its variation, and then 
+	push that variation into the PQ. */
+
+	pri_queue tempPQ;
+	time_t start = time(NULL);
+	int v = 0;
+	while (v < 1) {
+		v+=1;
+		//Pop off the bad arrays and free them
+		for (int i = 0; i < 6; ++i)
+		{
+			int* badResults = priq_pop(pq, NULL);
+			free(badResults);
+		}
+
+		tempPQ = priq_new(12);
+		int* goodResult;
+		while (goodResult = priq_pop(pq, &rank)){
+			priq_push(tempPQ, goodResult, rank);
+
+			//Create a variation of the goodResult
+			nodes = malloc(sizeof(int) * num_nodes);
+			for (int i = 0; i < num_nodes; ++i)
+			{
+				nodes[i] = goodResult[i];
+			}
+			int randomIndex = rand() % num_nodes;
+			int randomIndex2 = rand() % num_nodes;
+			nodes[randomIndex] = nodes[randomIndex2];
+			nodes[randomIndex2] = nodes[randomIndex];
+
+			//Set up a copy of the adjacency matrix
+			copyMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
+			for (int i = 0; i < num_nodes; ++i)
+			{
+				for (int j = 0; j < num_nodes; j++)
+				{
+					copyMatrix[i*num_nodes + j] = adjMatrix[i*num_nodes + j]; 
+				}
+			}
+
+			rank = solver(copyMatrix, nodes, num_nodes);
+			printf("%d\n", rank);
+			priq_push(tempPQ, nodes, rank);
+			free(copyMatrix);
+   		}
+
+   		pq = tempPQ;
+	}
+
+	//Return the best solution as the result
+	for (int i = 0; i < 11; ++i)
+	{
+		free(priq_pop(pq, NULL));
+	}
+	int* best_solution = priq_pop(pq, NULL);
+	return best_solution;
+}
+
+int main(int argc, const char* argv[])
+{
+	//Formats the code to read the input, solve, then output
+	//Create the output file
+	FILE* testOut = fopen("test.out", "w");
+
+	//LOOP through all in files
+	// #pragma omp for
+	for (int i = 1; i < 2; ++i)
+	{
+		//Read the file
+		char inFile[15];
+		sprintf(inFile, "test%d.in", i);
+		FILE* testIn = fopen(inFile, "r");
+		char line[500];
+
+		//THe first read should be the number of nodes
+		fgets(line, sizeof(line), testIn);
+		int num_nodes = atoi(line);
+
+		//Malloc space for the matrix
+		int* adjMatrix = malloc(sizeof(int) * num_nodes * num_nodes);
+
+		//Iterate through the file line by line, loading numbers into the matrix
+		for (int i = 0; i < num_nodes; ++i)
+		{
+			fgets(line, sizeof(line), testIn);
+			for (int j = 0; j < 2*num_nodes; j+=2) //+= 2 because we skip spaces
+			{
+				int edge = line[j] - '0';
+				adjMatrix[i*num_nodes + j/2] = edge; //j/2 to account for the skipping
+			}
+		}
+		fclose(testIn);
+
+		int* optSol = findSolution(adjMatrix, num_nodes);
+
+		//Write the node ordering returned from the solution
+		for (int i = 0; i < num_nodes; ++i)
+		{
+			fprintf(testOut, "%d ", optSol[i]);
+		}
+		//Place a newlinew
+		fprintf(testOut,"\n");
+
+		//Free the Matrix and the optimal solution
+		free(adjMatrix);
+	}
+
+	fclose(testOut);
 }
