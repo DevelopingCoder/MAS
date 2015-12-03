@@ -219,9 +219,9 @@ void edge(int a, int b, int * adj_matrix, int num_nodes) {
 }
 
 int* findSolution(int* adjMatrix, int num_nodes) {
-	/*Overall Strategy: Keep 2 PQs containing 12 permutations with their rank. Pop out 
-	the worst 7 and replace them with variations of the best 5 and add 2 random. 
-	Then we solve the 6 and repush them into PQ, repeating the process of dropping 
+	/*Overall Strategy: Keep 2 PQs containing 14 permutations with their rank. Pop out 
+	the worst 9 and replace them with variations of the best 5 and add 4 random. 
+	Then we solve the 9 and repush them into PQ, repeating the process of dropping 
 	the worst ones.*/
 	pri_queue pq1 = priq_new(12);
 	pri_queue pq2 = priq_new(12);
@@ -230,7 +230,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	int rank;
 	int* nodes;
 	int* copyMatrix;
-	for (int twentyFour = 0; twentyFour < 24; ++twentyFour)
+	for (int twentyEight = 0; twentyEight < 28; ++twentyEight)
 	{
 		//Set up initial array of nodes
 		nodes = malloc(sizeof(int) * num_nodes);
@@ -256,7 +256,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 		rank = solver(copyMatrix, nodes, num_nodes);
 
 		//Split pushing into 2 groups
-		if (twentyFour < 12)
+		if (twentyFour < 14)
 		{
 			priq_push(pq1, nodes, rank);
 		} else {
@@ -268,9 +268,9 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 		free(copyMatrix);
 	}
 	
-	/*For 5 minutes, pop off 7 worst and free them. Then pop off the 5 best. Create a new PQ,
+	/*For 5 minutes, pop off 9 worst and free them. Then pop off the 5 best. Create a new PQ,
 	and for each good permutation, push it into the new PQ, solve its variation, and then 
-	push that variation into the PQ. After, create 2 new random permutations, solve them
+	push that variation into the PQ. After, create 4 new random permutations, solve them
 	and add them into pq.*/
 
 	pri_queue tempPQ1;
@@ -279,7 +279,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	int* badResults;
 	while ((time(NULL) - start) < 1) {
 		//Pop off the bad arrays and free them
-		for (int i = 0; i < 7; ++i)
+		for (int i = 0; i < 9; ++i)
 		{
 			//Free PQ1
 			badResults = priq_pop(pq1, NULL);
@@ -290,11 +290,11 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 			free(badResults);
 		}
 
-		tempPQ1 = priq_new(12);
-		tempPQ2 = priq_new(12);
+		tempPQ1 = priq_new(14);
+		tempPQ2 = priq_new(14);
 		int* goodResult;
 		//Create the 6 variations of the good ones, then solve them and push into pq
-		for (int newInserts = 0; newInserts < 14; ++newInserts)
+		for (int newInserts = 0; newInserts < 18; ++newInserts)
 		{
 			if (newInserts < 5)
 			{
@@ -347,7 +347,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 			} else if (newInserts < 10)
 			{
 				priq_push(tempPQ2, nodes, rank);
-			} else if (newInserts < 12){
+			} else if (newInserts < 14){
 				priq_push(tempPQ1 ,nodes, rank);
 			} else {
 				priq_push(tempPQ2, nodes, rank);
@@ -361,7 +361,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	}
 
 	//Return the best solution as the result
-	for (int i = 0; i < 11; ++i)
+	for (int i = 0; i < 13; ++i)
 	{
 		badResults = priq_pop(pq1, NULL);
 		free(badResults);
@@ -392,6 +392,9 @@ int main(int argc, const char* argv[])
 	// #pragma omp for
 	for (int i = 2; i < 3; ++i)
 	{
+        //check if output file exsists first
+        //read first line and set an int to the rank
+        //
 		//Create the output file
 		char outFile[15];
 		sprintf(outFile, "outputs/%d.out", i);
