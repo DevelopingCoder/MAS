@@ -405,10 +405,8 @@ int main(int argc, const char* argv[])
 	//Formats the code to read the input, solve, then output
 	while (1) {
 		//LOOP through all in files
-		#pragma omp for
 		for (int i = 1; i < 622; ++i)
 		{
-			int thread_ID = omp_get_thread_num();
 			printf("thread is %d\n", thread_ID);
 			//Read the file
 			char inFile[15];
