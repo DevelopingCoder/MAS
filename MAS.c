@@ -256,7 +256,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 		rank = solver(copyMatrix, nodes, num_nodes);
 
 		//Split pushing into 2 groups
-		if (twentyFour < 14)
+		if (twentyEight < 14)
 		{
 			priq_push(pq1, nodes, rank);
 		} else {
