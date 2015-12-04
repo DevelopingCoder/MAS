@@ -7,5 +7,5 @@ all: MAS
 MAS: MAS.o
 
 clean:
-    rm -f *.o MAS
+	rm -f *.o MAS
     
