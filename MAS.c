@@ -280,7 +280,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	time_t start = time(NULL);
 	int* badResults;
 	int v = 0;
-	while (v < 45000) {
+	while (v < 45000){
 		v+=1;
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 9; ++i)
@@ -384,7 +384,6 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	free(otherBestElement);
 	
 	int* best_solution = priq_pop(pq1, &bestSolutionsRank);
-	printf("rank is %d	", bestSolutionsRank);
 	return best_solution;
 }
 
@@ -408,8 +407,9 @@ int main(int argc, const char* argv[])
 		printf("Completed %d iterations\n\n", iterations);
 		iterations += 1;
 		//LOOP through all in files
-		for (int i = 1; i < 622; ++i)
+		for (int i = 490; i > 0; i--)
 		{
+			printf("%d: current rank is %d\n", i - 1, bestSolutionsRank);
 			//Read the file
 			char inFile[15];
 			sprintf(inFile, "instances/%d.in", i);
