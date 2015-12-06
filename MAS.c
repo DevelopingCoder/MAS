@@ -268,7 +268,7 @@ int* findSolution(int* adjMatrix, int num_nodes) {
 	time_t start = time(NULL);
 	int v = 0;
 	int* badResults;
-	while (v < 1000) {
+	while (v < 5000) {
 		v+=1;
 		//Pop off the bad arrays and free them
 		for (int i = 0; i < 6; ++i)
@@ -348,7 +348,7 @@ int main(int argc, const char* argv[])
 	//Formats the code to read the input, solve, then output
 	while (1) {
 		//LOOP through all in files
-		for (int i = 621; i > 0; i--)
+		for (int i = 1; i < 622; i++)
 		{
 			//Read the file
 			char inFile[15];
@@ -374,6 +374,7 @@ int main(int argc, const char* argv[])
 			}
 			fclose(testIn);
 
+			printf("Solving %d.in\n", i);
 			int* optSol = findSolution(adjMatrix, num_nodes);
 			/* check to see if you did better than the last one */
 			/* check if there exists an out file, if not create the output file*/
@@ -422,7 +423,6 @@ int main(int argc, const char* argv[])
 
 			//Free the Matrix and the optimal solution
 			free(adjMatrix);
-			printf("%d.in\n", i);
 		}
 	}
 
