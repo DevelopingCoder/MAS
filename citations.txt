@@ -1,0 +1,5 @@
+Fisher-Yates shuffle taken from http://www.dispersiondesign.com/articles/algorithms/shuffle_array_order
+
+PQ Implementation taken from http://rosettacode.org/wiki/Priority_queue#C
+
+MAS Algo: http://stackoverflow.com/questions/1944382/how-to-find-2-approximate-solution-for-maximum-acyclic-subgraph-of-an-oriented-g
