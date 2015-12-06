@@ -1,0 +1,29 @@
+package concatenateFiles;
+import java.io.*;
+import java.util.*;
+
+public class FileConcatenator {
+	public static void main(String[] args) {
+		/*Read the output files from each folder and compare them. Find the best one, and write it
+		 * into outputs/testResults.out
+		 */
+		File testResults = new File("outputs/testResults.out");
+		for(int i = 1; i < 10; i++) {
+			File[] files = new File[4];
+			files[0] = new File("outputs" + "1/" + i + ".out");
+			files[1] = new File("outputs" + "2/" + i + ".out");
+			files[2] = new File("outputs" + "3/" + i + ".out");
+			files[3] = new File("outputs" + "4/" + i + ".out");
+			
+			int[] bestResult;
+			int bestResultsCount = 0;
+			for(int j = 0; j < 4; j++) {
+				BufferedReader output = new BufferedReader(files[j]);
+				String edges = output.readLine();
+			}
+			
+			
+			
+		}
+	}
+}

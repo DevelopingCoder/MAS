@@ -1,0 +1,34 @@
+package concatenateFiles;
+import java.io.*;
+import java.util.*;
+
+public class FileConcatenator {
+	public static void main(String[] args) throws IOException {
+		/*Read the output files from each folder and compare them. Find the best one, and write it
+		 * into outputs/testResults.out
+		 */
+		for(int i = 1; i < 10; i++) {
+			String[] paths = new String[4];
+			paths[0] = "outputs" + "1/" + i + ".out";
+			paths[1] = "outputs" + "2/" + i + ".out";
+			paths[2] = "outputs" + "3/" + i + ".out";
+			paths[3] = "outputs" + "4/" + i + ".out";
+			
+			int[] bestResult;
+			int bestResultsCount = 0;
+			for(int j = 0; j < 4; j++) {
+				BufferedReader output = new BufferedReader(paths[j]);
+				String edges = output.readLine();
+				int count = Integer.parseInt(edges);
+				if (count > bestResultsCount) {
+					PrintWriter resultFile = new PrintWriter("outputs/testResults.out");
+					
+					
+				}
+			}
+			
+			
+			
+		}
+	}
+}
