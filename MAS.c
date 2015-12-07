@@ -405,7 +405,7 @@ int main(int argc, const char* argv[])
 	//Formats the code to read the input, solve, then output
 	while (1) {
 		//LOOP through all in files
-		for (int i = 1; i < 622; i ++)
+		for (int i = 1; i < 622; i=rand()%622+1)
 		{
 			printf("running instance %d \n", i);
 			//Read the file
